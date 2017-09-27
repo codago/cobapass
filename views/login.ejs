@@ -1,0 +1,30 @@
+<% include partials/header %>
+<div class="container">
+  <div class="col-sm-6 col-sm-offset-3">
+    <h1><span class="fa fa-sign-in"></span> Login</h1>
+
+    <% if(message.length > 0){ %>
+      <div class="alert alert-danger">
+        <%= message %>
+      </div>
+    <% } %>
+    
+    <form action="/login" method="post">
+      <div class="form-group">
+        <label for="">Email</label>
+        <input class="form-control" type="text" name="email" value="">
+      </div>
+      <div class="form-group">
+        <label for="">Password</label>
+        <input class="form-control" type="password" name="password" value="">
+      </div>
+      <button type="submit" class="btn btn-danger btn-lg"> Login</button>
+    </form>
+
+    <hr>
+
+    <p>Belum punya akun? <a href="/signup">Signup</a></p>
+    <p>or go <a href="/">Home</a></p>
+  </div>
+</div>
+<% include partials/footer %>
