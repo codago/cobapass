@@ -38,5 +38,27 @@ module.exports = function(passport){
     res.render('profile', {user: req.user})
   });
 
+  router.get('/auth/facebook', passport.authenticate('facebook', {scope: 'email'}));
+
+  router.get('/auth/facebook/callback', passport.authenticate('facebook', {
+    successRedirect: '/profile',
+    failureRedirect: '/'
+  }));
+
+  router.get('/connect/facebook', passport.authorize('facebook', {scope: 'email'}));
+
+  router.get('/connect/facebook/callback', passport.authorize('facebook', {
+    successRedirect: '/profile',
+    failureRedirect: '/'
+  }));
+
+  router.get('/unlink/facebook', isLoggedIn, function(req, res){
+    let user = req.user;
+    user.facebook.token = undefined;
+    user.save(function(err){
+      res.redirect('/profile');
+    });
+  });
+
   return router;
 }

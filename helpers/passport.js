@@ -1,6 +1,8 @@
 'use strict'
 
 const LocalStrategy = require('passport-local').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+const configAuth = require('../config');
 const User = require('../models/user')
 
 module.exports = function(passport){
@@ -87,6 +89,57 @@ module.exports = function(passport){
         return done(null, user);
       }
     });
+  }));
+
+  //Facebook
+  let fbStrategy = configAuth.facebookAuth;
+  fbStrategy.passReqToCallback = true;
+  passport.use(new FacebookStrategy(fbStrategy, function(req, token, refreshToken, profile, done){
+    if(!req.user){
+      User.findOne({'facebook.id': profile.id}, function(err, user){
+        if(err){
+          return done(err)
+        }
+        if(user){ // user ada tapi token belum punya
+          if(!user.facebook.token){
+            user.facebook.token = token;
+            user.facebook.name = `${profile.name.givenName} ${profile.name.familyName}`;
+            user.facebook.email = (profile.emails[0].value || '').toLowerCase();
+            user.save(function(err){
+              if(err){
+                return done(err)
+              }
+              return done(null, user);
+            });
+          }
+          return done(null, user);
+        }else{
+          var newUser = new User();
+          newUser.facebook.id = profile.id;
+          newUser.facebook.token = token;
+          newUser.facebook.name = `${profile.name.givenName} ${profile.name.familyName}`;
+          newUser.facebook.email = (profile.emails[0].value || '').toLowerCase();
+          newUser.save(function(err){
+            if(err){
+              return done(err)
+            }
+            return done(null, newUser);
+          });
+        }
+      })
+    } else {
+      let user = req.user;
+      user.facebook.id = profile.id;
+      user.facebook.token = token;
+      user.facebook.name = `${profile.name.givenName} ${profile.name.familyName}`;
+      user.facebook.email = (profile.emails[0].value || '').toLowerCase();
+      user.save(function(err){
+        if(err){
+          return done(err)
+        }
+        return done(null, user);
+      });
+    }
   }));
 
 }
